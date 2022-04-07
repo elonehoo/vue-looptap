@@ -13,7 +13,7 @@ import { isDark, toggleDark } from '~/composables'
       class="icon-btn"
       i-carbon-logo-github
       rel="noreferrer"
-      href="https://github.com/xiaoxunyao/viden"
+      href="https://github.com/elonehoo/vue-looptap"
       target="_blank"
       title="GitHub"
     />
