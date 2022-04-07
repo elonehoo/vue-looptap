@@ -22,7 +22,7 @@
     '#6151A2'
   ])
 
-  function arcDValue(){
+  function arcDValue():string{
     return describeArc(50, 50, 40, arc.value[0], arc.value[1]);
   }
 
@@ -34,7 +34,7 @@
       }
   }
 
-  function describeArc(x:number, y:number, radius:number, startAngle:number, endAngle:number){
+  function describeArc(x:number, y:number, radius:number, startAngle:number, endAngle:number):string{
     const start = polarToCartesian(x, y, radius, endAngle);
     const end = polarToCartesian(x, y, radius, startAngle);
     const arcFlag = endAngle - startAngle <= 180 ? "0" : "1";
@@ -137,11 +137,11 @@
             </g>
             <path id="arc" fill="none"
                 v-bind:stroke="colors[Math.floor(score / 10)] || colors[Math.floor((score - 270) / 10)] || '#bdc3c7'"
-                stroke-width="10" stroke-linejoin="round" stroke-linecap="round" v-bind:d="arcDValue" />
+                stroke-width="10" stroke-linejoin="round" stroke-linecap="round" v-bind:d="arcDValue()" />
             <circle id="ball" cx="50" cy="50" r="4" fill="#2C3D51" v-bind:class="state"
                 v-bind:style="'animation-duration: '+(2000 - taps * 40) + 'ms'" />
             <polygon id="play" points="45,45 55,50 45,55" fill="#2C3D51" stroke="#2C3D51" stroke-width="5"
-                stroke-linejoin="round" stroke-linecap="round" v-if="state !== 'started'" v-on:click="startPlay" />
+                stroke-linejoin="round" stroke-linecap="round" v-if="state !== 'started'" v-on:click="startPlay()" />
         </svg>
     </section>
 </template>
