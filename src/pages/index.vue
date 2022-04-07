@@ -143,6 +143,15 @@
             <polygon id="play" points="45,45 55,50 45,55" fill="#2C3D51" stroke="#2C3D51" stroke-width="5"
                 stroke-linejoin="round" stroke-linecap="round" v-if="state !== 'started'" v-on:click="startPlay()" />
         </svg>
+        <a
+				id="shareBtn"
+				v-bind:href="'https://twitter.com/intent/tweet?url=https%3A%2F%2Flooptap.elonehoo.xyz%2F&text=Beat%20my%20score%3A%20'+score+'%0aLooptap%20-%20a%20minimal%20game%20to%20waste%20your%20time.&hashtags=looptap'"
+				v-if="['stopped', 'started'].includes(state)"
+				target="_blank"
+				v-bind:class="state === 'started' ? 'hide' : ''"
+			>
+				Share your score
+			</a>
     </section>
 </template>
 
