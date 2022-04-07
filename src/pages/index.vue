@@ -52,9 +52,9 @@
   }
 
   function getBallAngle() {
-    const bg = document.getElementById("bg").getBoundingClientRect();
+    const bg = (document.getElementById("bg")as HTMLInputElement).getBoundingClientRect();
     const bgCenter = { x: bg.left + bg.width / 2, y: bg.top + bg.height / 2 };
-    const ball = document.getElementById("ball").getBoundingClientRect();
+    const ball = (document.getElementById("ball")as HTMLInputElement).getBoundingClientRect();
     const ballCenter = { x: ball.left + ball.width / 2, y: ball.top + ball.height / 2 };
     return getAngle(bgCenter.x, bgCenter.y, ballCenter.x, ballCenter.y);
   }
