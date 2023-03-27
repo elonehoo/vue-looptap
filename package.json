@@ -1,6 +1,6 @@
 {
   "private": true,
-  "packageManager": "pnpm@6.35.1",
+  "packageManager": "pnpm@7.30.5",
   "scripts": {
     "build": "vite build",
     "dev": "vite --port 3333 --open",
@@ -23,7 +23,7 @@
     "@vue/test-utils": "^2.3.2",
     "eslint": "^8.36.0",
     "jsdom": "^19.0.0",
-    "pnpm": "^6.35.1",
+    "pnpm": "^7.30.5",
     "typescript": "^4.9.5",
     "unocss": "^0.50.6",
     "unplugin-auto-import": "^0.15.2",
