@@ -9,4 +9,3 @@ Vue LoopTap
 <h6 align='center'>
 <a href="https://looptap.elonehoo.xyz">Live Demo</a>
 </h6>
-

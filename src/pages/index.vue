@@ -1,158 +1,173 @@
-
 <script setup lang="ts">
-  const arc =ref([180, 270])
-  const taps = ref(0)
-  const score = ref(0)
-  const best = ref(window.localStorage.best || 0)
-  const state = ref("init")
-  const prevTapTime = ref(0)
-  const colors = ref([
-    '#F26D22',
-    '#F1B21D',
-    '#ECE82F',
-    '#AED136',
-    '#7EC242',
-    '#63BC46',
-    '#65BD5D',
-    '#64C29A',
-    '#61C8D2',
-    '#2DAAE1',
-    '#456EB5',
-    '#4451A3',
-    '#6151A2'
-  ])
+const arc = ref([180, 270])
+const taps = ref(0)
+const score = ref(0)
+const best = ref(window.localStorage.best || 0)
+const state = ref('init')
+const prevTapTime = ref(0)
+const colors = ref([
+  '#F26D22',
+  '#F1B21D',
+  '#ECE82F',
+  '#AED136',
+  '#7EC242',
+  '#63BC46',
+  '#65BD5D',
+  '#64C29A',
+  '#61C8D2',
+  '#2DAAE1',
+  '#456EB5',
+  '#4451A3',
+  '#6151A2',
+])
 
-  function arcDValue():string{
-    return describeArc(50, 50, 40, arc.value[0], arc.value[1]);
+function arcDValue(): string {
+  return describeArc(50, 50, 40, arc.value[0], arc.value[1])
+}
+
+function polarToCartesian(centerX: number, centerY: number, radius: number, angleInDegrees: number) {
+  const angleInRadians = ((angleInDegrees - 90) * Math.PI) / 180.0
+  return {
+    x: centerX + radius * Math.cos(angleInRadians),
+    y: centerY + radius * Math.sin(angleInRadians),
   }
+}
 
-  function polarToCartesian(centerX:number, centerY:number, radius:number, angleInDegrees:number){
-      const angleInRadians = ((angleInDegrees - 90) * Math.PI) / 180.0;
-      return {
-        x: centerX + radius * Math.cos(angleInRadians),
-        y: centerY + radius * Math.sin(angleInRadians),
+function describeArc(x: number, y: number, radius: number, startAngle: number, endAngle: number): string {
+  const start = polarToCartesian(x, y, radius, endAngle)
+  const end = polarToCartesian(x, y, radius, startAngle)
+  const arcFlag = endAngle - startAngle <= 180 ? '0' : '1'
+  const d = `M` + ` ${start.x} ${start.y} ` + `A` + ` ${radius} ${radius} ${0} ${arcFlag}${0} ${end.x} ${end.y}`
+  return d
+}
+
+function getAngle(cx: any, cy: any, ex: any, ey: any) {
+  const dy = ey - cy
+  const dx = ex - cx
+  let theta = Math.atan2(dx, -dy)
+  theta *= 180 / Math.PI
+  theta = theta < 0 ? theta + 360 : theta
+  return theta
+}
+
+function getBallAngle() {
+  const bg = (document.getElementById('bg') as HTMLInputElement).getBoundingClientRect()
+  const bgCenter = { x: bg.left + bg.width / 2, y: bg.top + bg.height / 2 }
+  const ball = (document.getElementById('ball') as HTMLInputElement).getBoundingClientRect()
+  const ballCenter = { x: ball.left + ball.width / 2, y: ball.top + ball.height / 2 }
+  return getAngle(bgCenter.x, bgCenter.y, ballCenter.x, ballCenter.y)
+}
+
+function setArc() {
+  const random = (i: any, j: any) => Math.floor(Math.random() * (j - i)) + i
+  const arc1 = []
+  arc1.push(random(0, 300))
+  arc1.push(random(arc1[0] + 10, arc1[0] + 110))
+  arc1[1] = arc1[1] > 360 ? 360 : arc1[1]
+  arc.value = arc1
+}
+
+function startPlay() {
+  state.value = 'started'
+  taps.value = 0
+  score.value = 0
+  prevTapTime.value = Date.now()
+}
+
+function stopPlay() {
+  if (state.value === 'started') {
+    state.value = 'stopped'
+    if (score.value > best.value)
+      window.localStorage.best = best.value = score.value
+  }
+}
+
+function tap(e: any) {
+  e.preventDefault()
+  e.stopPropagation()
+  if (state.value === 'started') {
+    const ballAngle = getBallAngle()
+    // adding a 6 for better accuracy as the arc stroke extends beyond the angle.
+    if (ballAngle + 6 > arc.value[0] && ballAngle - 6 < arc.value[1]) {
+      const currentTapTime = Date.now()
+      const tapInterval = currentTapTime - prevTapTime.value
+      taps.value++
+      score.value = score.value + (tapInterval < 500 ? 5 : tapInterval < 1000 ? 2 : 1)
+      prevTapTime.value = currentTapTime
+      setArc()
+    }
+    else {
+      stopPlay()
+    }
+  }
+}
+
+if ('ontouchstart' in window) {
+  window.addEventListener('touchstart', tap)
+}
+else {
+  window.addEventListener('mousedown', tap)
+  window.onkeypress = (e) => {
+    if (e.keyCode === 32) {
+      if (state.value === 'stopped') {
+        startPlay()
       }
-  }
-
-  function describeArc(x:number, y:number, radius:number, startAngle:number, endAngle:number):string{
-    const start = polarToCartesian(x, y, radius, endAngle);
-    const end = polarToCartesian(x, y, radius, startAngle);
-    const arcFlag = endAngle - startAngle <= 180 ? "0" : "1";
-    const d = "M"+ " " + start.x + " " + start.y + " " + "A" + " " + radius + " " + radius + " " + 0 + " " + arcFlag + "" + 0 + " " + end.x + " "+ end.y
-    return d;
-  }
-
-  function getAngle(cx:any, cy:any, ex:any, ey:any) {
-    const dy = ey - cy;
-    const dx = ex - cx;
-    let theta = Math.atan2(dx, -dy);
-    theta *= 180 / Math.PI;
-    theta = theta < 0 ? theta + 360 : theta;
-    return theta
-  }
-
-  function getBallAngle() {
-    const bg = (document.getElementById("bg")as HTMLInputElement).getBoundingClientRect();
-    const bgCenter = { x: bg.left + bg.width / 2, y: bg.top + bg.height / 2 };
-    const ball = (document.getElementById("ball")as HTMLInputElement).getBoundingClientRect();
-    const ballCenter = { x: ball.left + ball.width / 2, y: ball.top + ball.height / 2 };
-    return getAngle(bgCenter.x, bgCenter.y, ballCenter.x, ballCenter.y);
-  }
-
-  function setArc() {
-    const random = (i:any, j:any) => Math.floor(Math.random() * (j - i)) + i;
-    let arc1 = [];
-    arc1.push(random(0, 300));
-    arc1.push(random(arc1[0] + 10, arc1[0] + 110));
-    arc1[1] = arc1[1] > 360 ? 360 : arc1[1];
-    arc.value = arc1;
-  }
-
-  function startPlay() {
-    state.value = "started";
-    taps.value = 0;
-    score.value = 0;
-    prevTapTime.value = Date.now();
-  }
-
-  function stopPlay() {
-    if (state.value === "started") {
-      state.value = "stopped";
-      if (score.value > best.value) window.localStorage.best = best.value = score.value
-    }
-  }
-
-  function tap(e:any) {
-    e.preventDefault();
-    e.stopPropagation();
-    if (state.value === "started") {
-      const ballAngle = getBallAngle();
-      // adding a 6 for better accuracy as the arc stroke extends beyond the angle.
-      if (ballAngle + 6 > arc.value[0] && ballAngle - 6 < arc.value[1]) {
-        const currentTapTime = Date.now();
-        const tapInterval = currentTapTime - prevTapTime.value;
-        taps.value++;
-        score.value = score.value + (tapInterval < 500 ? 5 : tapInterval < 1000 ? 2 : 1);
-        prevTapTime.value = currentTapTime;
-        setArc();
-      } else {
-        stopPlay()
+      else {
+        tap(e)
       }
     }
   }
-
-  if ("ontouchstart" in window) {
-        window.addEventListener("touchstart", tap);
-    } else {
-        window.addEventListener("mousedown", tap);
-        window.onkeypress = (e) => {
-            if (e.keyCode == 32) {
-                if (state.value === "stopped") {
-                    startPlay();
-                } else {
-                    tap(e);
-                }
-            }
-        };
-    }
+}
 </script>
 
 <template>
-  <section id="canvas" v-bind:style="'display:flex;'">
-        <svg id="looptap" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-            <rect id="bg" x="0" cy="0" height="100" width="100" fill="none" />
-            <text x="50" y="50" dominant-baseline="middle" text-anchor="middle" class="score" id="score"
-                v-if="state === 'started'" v-html="score"></text>
-            <text x="50" y="32" text-anchor="middle" class="score" id="finalscore" v-if="state === 'stopped'"
-                v-html="score"></text>
-            <text x="50" y="70" text-anchor="middle" class="score" id="best" v-if="state === 'stopped'"
-                v-html="'Best: '+best"></text>
-            <g id="tip" v-if="state === 'init'">
-                <text x="50" y="68" text-anchor="middle" class="tip">
-                    Tap anywhere / press spacebar when
-                </text>
-                <text x="50" y="74" text-anchor="middle" class="tip">
-                    the ball is on the colored area.
-                </text>
-            </g>
-            <path id="arc" fill="none"
-                v-bind:stroke="colors[Math.floor(score / 10)] || colors[Math.floor((score - 270) / 10)] || '#bdc3c7'"
-                stroke-width="10" stroke-linejoin="round" stroke-linecap="round" v-bind:d="arcDValue()" />
-            <circle id="ball" cx="50" cy="50" r="4" fill="#2C3D51" v-bind:class="state"
-                v-bind:style="'animation-duration: '+(2000 - taps * 40) + 'ms'" />
-            <polygon id="play" points="45,45 55,50 45,55" fill="#2C3D51" stroke="#2C3D51" stroke-width="5"
-                stroke-linejoin="round" stroke-linecap="round" v-if="state !== 'started'" v-on:click="startPlay()" />
-        </svg>
-        <a
-				id="shareBtn"
-				v-bind:href="'https://twitter.com/intent/tweet?url=https%3A%2F%2Flooptap.elonehoo.xyz%2F&text=Beat%20my%20score%3A%20'+score+'%0aLooptap%20-%20a%20minimal%20game%20to%20waste%20your%20time.&hashtags=looptap'"
-				v-if="['stopped', 'started'].includes(state)"
-				target="_blank"
-				v-bind:class="state === 'started' ? 'hide' : ''"
-			>
-				Share your score
-			</a>
-    </section>
+  <section id="canvas" style="display:flex;">
+    <svg id="looptap" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+      <rect id="bg" x="0" cy="0" height="100" width="100" fill="none" />
+      <text
+        v-if="state === 'started'" id="score" x="50" y="50" dominant-baseline="middle" text-anchor="middle"
+        class="score" v-html="score"
+      />
+      <text
+        v-if="state === 'stopped'" id="finalscore" x="50" y="32" text-anchor="middle" class="score"
+        v-html="score"
+      />
+      <text
+        v-if="state === 'stopped'" id="best" x="50" y="70" text-anchor="middle" class="score"
+        v-html="`Best: ${best}`"
+      />
+      <g v-if="state === 'init'" id="tip">
+        <text x="50" y="68" text-anchor="middle" class="tip">
+          Tap anywhere / press spacebar when
+        </text>
+        <text x="50" y="74" text-anchor="middle" class="tip">
+          the ball is on the colored area.
+        </text>
+      </g>
+      <path
+        id="arc" fill="none"
+        :stroke="colors[Math.floor(score / 10)] || colors[Math.floor((score - 270) / 10)] || '#bdc3c7'"
+        stroke-width="10" stroke-linejoin="round" stroke-linecap="round" :d="arcDValue()"
+      />
+      <circle
+        id="ball" cx="50" cy="50" r="4" fill="#2C3D51" :class="state"
+        :style="`animation-duration: ${2000 - taps * 40}ms`"
+      />
+      <polygon
+        v-if="state !== 'started'" id="play" points="45,45 55,50 45,55" fill="#2C3D51" stroke="#2C3D51"
+        stroke-width="5" stroke-linejoin="round" stroke-linecap="round" @click="startPlay()"
+      />
+    </svg>
+    <a
+      v-if="['stopped', 'started'].includes(state)"
+      id="shareBtn"
+      :href="`https://twitter.com/intent/tweet?url=https%3A%2F%2Flooptap.elonehoo.xyz%2F&text=Beat%20my%20score%3A%20${score}%0aLooptap%20-%20a%20minimal%20game%20to%20waste%20your%20time.&hashtags=looptap`"
+      target="_blank"
+      :class="state === 'started' ? 'hide' : ''"
+    >
+      Share your score
+    </a>
+  </section>
 </template>
 
 <style>
