@@ -1,5 +1,5 @@
 <div align='center'>
-<img wigth='100px' height='100px' src="./public/favicon.svg">
+<img width="100" height="100" alt="Vue LoopTap" src="./public/favicon.svg">
 </div>
 
 <h1 align='center'>
